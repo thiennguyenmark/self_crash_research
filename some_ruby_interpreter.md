@@ -1,4 +1,5 @@
 `1. Ruby chạy code của bạn như nào?`
+
 Trước khi nói về các trình thông dịch, tôi xin nêu khái quát về quá trình ruby thực thi mã code của bạn.
 Với bất cứ đoạn mã ruby nào, mã nguồn bạn viết sẽ trải qua các bước sau để có thể tới được trình thông dịch (chủ đề mà ta đang tìm hiểu).
 
@@ -10,12 +11,14 @@ Parse: Qua bước đầu tiên, ta đã có một token, đến bước thứ h
 Compile: Đến bước này, ruby sẽ biên dịch kết quả ở bước 2 thành bytecode và truyền kết quả biên dịch được sang cho máy ảo ruby (là phần mà chúng ta đang tìm hiểu trong bài viết).
 
 `2. CRuby, MRI, YARV, KRI`
+
 Để kiểm tra xem ruby trên máy tính của bạn đang sử dụng trình thông dịch nào, hãy mở irb và sử dụng lệnh sau:
 
 ```
 RbConfig::CONFIG["RUBY_INSTALL_NAME"]
 #=> kết quả trả về trên máy của tôi là: ruby
 ```
+
 Điều này có nghĩa tôi đang sử dụng trình thông dịch mặc định trong ruby. Được gọi là MRI/CRuby hay phiên bản nâng cấp sau này là YARV/KRI. Giải thích về việc có nhiều tên gọi như trên, tôi xin trích dẫn các thông tin trên wiki và trình thông dịch này:
 
 Matz’s Ruby Interpreter or Ruby MRI (also called CRuby) was the reference implementation of the Ruby programming language named after Ruby creator Yukihiro Matsumoto (“Matz”)
@@ -29,6 +32,7 @@ YARV was merged into the Ruby Subversion repository on January 1, 2007. It was r
 Qua vài trích dẫn kể trên, chúng ta có thể thấy đơn giản những khái niệm CRuby, YARV, MRI, KRI đều nhằm mô tả về một trình thông dịch được sử dụng mặc định cho ruby (tuỳ phiên bản sẽ có khác nhau, hiểu theo nghĩa là một sự update thay vì là thay thế).
 
 `3. JRuby`
+
 Còn một vài trình thông dịch khác mà tôi đã đọc được, nhưng JRuby là phần cuối mà chúng ta sẽ tìm hiểu, vì những những trình thông dịch còn lại không được phổ biến cho lắm.
 
 JRuby = Java + Ruby
