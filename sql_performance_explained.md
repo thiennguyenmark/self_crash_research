@@ -1,4 +1,5 @@
 `SQL Performance Explained`
+
 NOTES 2020-01-05   NOTES
 The notes of mine after read SQL Performance Explained Ebook (boring, but helpful).
 
@@ -6,6 +7,7 @@ Anatomy of an Index
 Cơ sở dữ liệu sử dụng 2 loại cấu trúc để lưu trữ index. B-Tree và Doubly Linked List. Vì vậy cách sử dụng 2 loại cấu trúc này sẽ giải thích cho phần lớn các đặc tính của SQL.
 
 `Doubly Linked List`
+
 Mỗi một node (node chứa index) sẽ là một node trong 1 Doubly Linked List, vì vậy nó sẽ có liên kết tới đến 2 node lân cận (một trước và một sau). Khi ta muốn chèn thêm 1 node mới vào dslk đôi này. Ta sẽ tìm vị trí 2 node cần chèn node mới vào giữa chúng, đơn giản chỉ thay đổi con trỏ của 2 node đó. Vì thế vị trí vật lý của node mới không quan trọng. Lợi ích của việc này là giúp việc chèn thêm dữ liệu không tốn quá nhiều công sức, chỉ thay đổi vài con trỏ.
 
 Mỗi leaf node được lưu chữ trong 1 block/page. Mỗi block sẽ thườn là 1 vài KB, csdl sẽ cố gắng lưu nhiều node (node chưa index) nhất có thể trong mỗi block/page. Vậy csdl sẽ dùng dsdl đôi để quản lý trong 2 cấp (Dùng trong các node thuộc 1 block/page và dùng giữa các blog với nhau). Hiểu đơn giản như ta chia Việt Nam thành 63 block ứng với 63 tỉnh thành. Mỗi khi ta muốn tìm 1 tỉnh nào đó thì tìm trong sdl đôi của 63 tỉnh. Khi đã tìm thấy tỉnh cần tìm ta muốn tìm đến huyện (các huyện trong tỉnh đó cũng dùng dslk đôi để kết nối). Nhìn hình dưới đây.
@@ -21,6 +23,7 @@ Như hình trên. Dslk đôi giúp sắp xếp các node và các block/page. Ro
 Lý do B-Tree được lựa chọn và sử dụng rộng rãi là vì đặc tính cân bằng của cây. Độ cao của cây là không đổi từ root đến bất kể node lá nào. Tính tăng trưởng chiều cao của cây theo Logarit khi tăng node lá dẫn đến 1 cây bậc 4, 5 có thể chứa hàng triệu node và trong thực tế gần như không có trường hợp nào có độ sâu lên đến 6.
 
 `The Where Clause`
+
 Concatenated Indexes
 Các hệ quản trị cơ sở dữ liệu hiện nay sẽ đánh index cho khoá chính một cách tự động.
 
@@ -59,6 +62,7 @@ SELECT first_name, last_name, phone_number
   FROM employees
   WHERE UPPER(last_name) = UPPER('winand');
 ```
+
 Tìm các record có last_name = ‘winand’, trước khi tìm kiếm thì sẽ dùng hàm UPPER để covert dữ liệu sang chữ hoa khi so khớp. Nhớ điều kiện bên trên, chúng ta đã đánh index cho field last_name tuy nhiên trong trường hợp này index sẽ không còn hoạt động, thay vào đó là 1 full scan toàn bộ bảng.
 
 Mô tuýt:
@@ -68,6 +72,7 @@ SELECT first_name, last_name, phone_number
   FROM employees
   WHERE BLACKBOX(...) = 'WINAND';
   ```
+
 Trong đó thay BLACKBOX bằng một function bất kỳ, ứng với việc index không còn hoạt động.
 
 Giải pháp: Đánh index luôn giá trị thực sự sẽ dùng khi tìm kiếm, ở đây là last_name dưới dạng viết hoa.
@@ -76,6 +81,7 @@ Giải pháp: Đánh index luôn giá trị thực sự sẽ dùng khi tìm ki�
 CREATE INDEX emp_up_name
   ON employees (UPPER(last_name));
 ```
+
 Ta gọi chỉ mục được tạo trên là function-based index (FBI), chỉ mục dựa trên function.
 
 Thay vì copy luôn dữ liệu cột được đánh vào cây index. Một function-based index sẽ apply function vào dữ liệu trước khi ghi vào cây index. Vậy trong ví dụ trên, cây index sẽ chứa toàn bộ last_name dưới dạng chữ hoa.
@@ -100,6 +106,7 @@ BEGIN
  TRUNC(MONTHS_BETWEEN(SYSDATE, date_of_birth)/12);
 END;
 ```
+
 Không thể dùng get_age cho function-based index. Vì ví dụ tôi sinh ngày 30/08/1995. Ứng với mỗi thời điểm khác nhau output của hàm này sẽ khác nhau với cùng một đối số truyền vào là ngày sinh của tôi. Vậy nên nó không dùng để function-based index được.
 
 Các function khác không thể dụng cho index là function random hoặc function dựa trên biến môi trường.
@@ -125,6 +132,7 @@ SELECT first_name, last_name, date_of_birth
   AND date_of_birth <= TO_DATE(?, 'YYYY-MM-DD')
   AND subsidiary_id = ?
   ```
+
 Ok, giờ chúng ta có một câu truy vấn như trên, tìm tất cả nhân viên có subsidiary_id = 27 và ngày sinh nằm trong khoảng 1/1/1971 và 9/1/1971.
 
 Chúng ta sẽ đánh index cho 2 cột trên, đánh như bên trên đã ghi. Tuy nhiên thứ tự đánh index như nào?
@@ -155,6 +163,7 @@ SELECT first_name, last_name, date_of_birth
   FROM employees
   WHERE UPPER(last_name) LIKE 'WINND'
   ```
+
 Đánh index trên last_name và ngon.
 
 ```
@@ -163,6 +172,7 @@ SELECT first_name, last_name, date_of_birth
   WHERE UPPER(last_name) LIKE 'WIN%D'
 
   ```
+
 Ký tự % xuất hiện và không ngon nữa rồi. Vì lúc này, index chỉ sử dụng phần trước % để tính khoảng range cần quét, còn phần đằng sau % chỉ dùng nhiệm vụ so khớp.
 
 Tức là phải quét qua bao nhiêu phần tử sẽ hoàn toàn do phần đầu tiên quyết định. Từ có ta có 2 định nghĩa tác giả nêu ra:
@@ -196,6 +206,7 @@ SELECT first_name, last_name, date_of_birth
   WHERE UPPER(last_name) < ?
   AND date_of_birth < ?
   ```
+
 hệ quản trị csdl sẽ phải duyệt qua 2 cây index (1 cây ứng với index cho last_name và cây còn lại ứng với index cho date_of_birth). Sau đó combine kết quả của 2 lần duyệt ở trên lại.
 
 Sẽ tốn resource hơn rất nhiều so với đánh 1 index cho last_name + date_of_birth.
